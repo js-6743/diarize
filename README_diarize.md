@@ -1,4 +1,4 @@
-# Diarized transcription (macOS Bash + Python)
+# Diarized transcription (PowerShell + Bash + Python)
 
 Speaker-attributed transcription of German audio/video using
 **faster-whisper large-v3** (ASR) and **pyannote community-1** (diarization).
@@ -8,6 +8,20 @@ Speaker-attributed transcription of German audio/video using
 ---
 
 ## Folder structure
+
+Windows example:
+
+```
+~/Documents/Python/diarize/
+    .hf_token
+    input/          # place audio/video files here
+    out/            # transcription results (per batch)
+    models/         # whisper model cache (automatic)
+    scripts/
+        diarize.py
+        transcribe.ps1
+        run_diarize.ps1
+```
 
 macOS example:
 
@@ -29,6 +43,15 @@ Each run processes **one batch folder** under `input/`.
 
 ## Run transcription
 
+### Windows (PowerShell)
+
+```powershell
+cd C:\Users\josef\Documents\Python\diarize\scripts
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+.\run_diarize.ps1 Expert_03 -NumSpeakers 2
+```
+
 ### macOS (zsh)
 
 ```bash
@@ -37,6 +60,10 @@ cd ~/Documents/Python/diarize/scripts
 ```
 
 If you have subfolders under the batch:
+
+```powershell
+.\run_diarize.ps1 Expert_03 -NumSpeakers 2 -Recurse
+```
 
 ```bash
 ./run_diarize.sh Expert_03 --num-speakers 2 --recurse
@@ -96,6 +123,13 @@ Ich bin 45.
 
 ### Model / device
 
+```powershell
+.\run_diarize.ps1 Expert_03 -Model "large-v3"
+.\run_diarize.ps1 Expert_03 -Device "cpu"
+.\run_diarize.ps1 Expert_03 -ComputeType "int8_float16"   # faster, slightly less accurate
+.\run_diarize.ps1 Expert_03 -OutputFormat "txt"
+```
+
 ```bash
 ./run_diarize.sh Expert_03 --model "large-v3"
 ./run_diarize.sh Expert_03 --device "cpu"
@@ -107,11 +141,19 @@ Ich bin 45.
 
 If you know how many speakers are in the recording:
 
+```powershell
+.\run_diarize.ps1 Expert_03 -NumSpeakers 2
+```
+
 ```bash
 ./run_diarize.sh Expert_03 --num-speakers 2
 ```
 
 Or provide a range:
+
+```powershell
+.\run_diarize.ps1 Expert_03 -MinSpeakers 2 -MaxSpeakers 4
+```
 
 ```bash
 ./run_diarize.sh Expert_03 --min-speakers 2 --max-speakers 4
@@ -126,6 +168,17 @@ Works identically to the whisper setup.
 
 ```bash
 # Use default context file (expert_interview_context.txt)
+.\run_diarize.ps1 Expert_03
+
+# Different context filename
+.\run_diarize.ps1 Expert_03 -ContextFile "template_context.txt"
+
+# Disable context entirely
+.\run_diarize.ps1 Expert_03 -NoContext
+```
+
+```bash
+# Use default context file (expert_interview_context.txt)
 ./run_diarize.sh Expert_03
 
 # Different context filename
@@ -137,6 +190,10 @@ Works identically to the whisper setup.
 
 ### Python environment
 
+```powershell
+.\run_diarize.ps1 Expert_03 -PythonExe "C:\path\to\envs\diarize\Scripts\python.exe"
+```
+
 ```bash
 ./run_diarize.sh Expert_03 --python-exe "/path/to/envs/diarize/bin/python"
 ```
@@ -144,6 +201,10 @@ Works identically to the whisper setup.
 ### HuggingFace token
 
 If you prefer not to use a `.hf_token` file:
+
+```powershell
+.\run_diarize.ps1 Expert_03 -HfToken "hf_abc123..."
+```
 
 ```bash
 ./run_diarize.sh Expert_03 --hf-token "hf_abc123..."
