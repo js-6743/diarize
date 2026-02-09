@@ -12,12 +12,12 @@ Speaker-attributed transcription of German audio/video using
 Windows example:
 
 ```
-C:\Users\josef\Documents\Python\diarize\
+~/Documents/Python/diarize/
     .hf_token
-    input\          # place audio/video files here
-    out\            # transcription results (per batch)
-    models\         # whisper model cache (automatic)
-    scripts\
+    input/          # place audio/video files here
+    out/            # transcription results (per batch)
+    models/         # whisper model cache (automatic)
+    scripts/
         diarize.py
         transcribe.ps1
         run_diarize.ps1
@@ -37,7 +37,7 @@ macOS example:
         run_diarize.sh
 ```
 
-Each run processes **one batch folder** under `input\`.
+Each run processes **one batch folder** under `input/`.
 
 ---
 
@@ -77,8 +77,8 @@ For each audio file you get **combined** files (all speakers) plus
 **per-speaker** files:
 
 ```
-out\Expert_03\
-    Expert_03_Recording_1\
+out/Expert_03/
+    Expert_03_Recording_1/
         Expert_03_Recording_1.txt             ← all speakers
         Expert_03_Recording_1.json
         Expert_03_Recording_1.srt
@@ -88,7 +88,7 @@ out\Expert_03\
         Expert_03_Recording_1_SPEAKER_01.txt  ← speaker 01 only
         Expert_03_Recording_1_SPEAKER_01.json
         Expert_03_Recording_1_SPEAKER_01.srt
-    Expert_03_Recording_2\
+    Expert_03_Recording_2/
         ...
     _log.txt
 ```
@@ -159,14 +159,14 @@ Or provide a range:
 ./run_diarize.sh Expert_03 --min-speakers 2 --max-speakers 4
 ```
 
-> For expert interviews (interviewer + interviewee), `-NumSpeakers 2`
+> For expert interviews (interviewer + interviewee), `--num-speakers 2`
 > gives the best results.
 
 ### Context / initial prompt
 
 Works identically to the whisper setup.
 
-```powershell
+```bash
 # Use default context file (expert_interview_context.txt)
 .\run_diarize.ps1 Expert_03
 
@@ -240,23 +240,23 @@ are automatically converted to 16 kHz mono WAV via ffmpeg before diarization.
 ## Troubleshooting
 
 - **"No HuggingFace token found"**
-  Create `.hf_token` in project root, set `HF_TOKEN` env var, or pass `-HfToken`.
+  Create `.hf_token` in project root, set `HF_TOKEN` env var, or pass `--hf-token`.
 
-- **"PythonExe not found"**
-  Pass `-PythonExe` with the correct venv path.
+- **"Python executable not found"**
+  Pass `--python-exe` with the correct venv path.
 
 - **CUDA out of memory**
-  Try `-ComputeType "int8_float16"` or `-Device "cpu"`.
+  Try `--compute-type "int8"` or `--device "cpu"`.
 
 - **First run is slow**
   Expected — downloads whisper model (~3 GB) and pyannote models (~500 MB).
   Cached after first run.
 
 - **Speaker labels are wrong / too many speakers**
-  Use `-NumSpeakers 2` for two-person interviews.
+  Use `--num-speakers 2` for two-person interviews.
 
 - **No media files found**
-  Check files are in `input\<Batch>\` and enable `-Recurse` if in subfolders.
+  Check files are in `input/<Batch>/` and enable `--recurse` if in subfolders.
 
 - **torch.cuda.is_available() returns False**
   pyannote.audio installs CPU-only torch. Reinstall with CUDA:
@@ -275,5 +275,5 @@ are automatically converted to 16 kHz mono WAV via ffmpeg before diarization.
 | Word timestamps | segment-level | word-level |
 | Speed | 1× | ~4× faster (batched inference) |
 | Output | txt/srt/vtt/tsv/json | txt/srt/json (with speakers) |
-| venv | `envs\whisper\` | `envs\diarize\` |
-| project | `Python\whisper\` | `Python\diarize\` |
+| venv | `envs/whisper/` | `envs/diarize/` |
+| project | `Python/whisper/` | `Python/diarize/` |

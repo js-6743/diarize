@@ -39,7 +39,9 @@ and **replace existing files**:
 cd C:\Users\josef\Documents\Python\diarize\scripts
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-.\run_diarize.ps1 Biweekly -NumSpeakers 3 -Extensions wav
+```bash
+cd ~/Documents/Python/diarize/scripts
+./run_diarize.sh Biweekly --num-speakers 3 --extensions wav
 ```
 
 ### macOS (zsh)
@@ -61,15 +63,13 @@ Then the normal `transcribe.ps1` / `transcribe.sh` output.
 
 ## FFmpeg
 
-You usually do **not** need to pass `-FfmpegBin` if `where.exe ffmpeg` already works.  
-`run_diarize.ps1` will auto-detect `ffmpeg` from PATH and set `FFMPEG_BIN` accordingly.
+You usually do **not** need to pass `--ffmpeg-bin` if `which ffmpeg` already works.  
+`run_diarize.sh` will auto-detect `ffmpeg` from PATH and set `FFMPEG_BIN` accordingly.
 
-To force a specific ffmpeg folder (the folder that contains `ffmpeg.exe`):
+To force a specific ffmpeg folder (the folder that contains `ffmpeg`):
 
-```powershell
-.\run_diarize.ps1 Biweekly `
-  -FfmpegBin "C:\path\to\ffmpeg\bin" `
-  -NumSpeakers 3 -Extensions wav
+```bash
+./run_diarize.sh Biweekly --ffmpeg-bin "/opt/homebrew/bin" --num-speakers 3
 ```
 
 If the path doesn’t exist, the wrapper prints a warning and continues.
@@ -82,16 +82,7 @@ On macOS/Linux you can pass the folder that contains `ffmpeg`:
 
 ---
 
-## Why this wrapper is stable
-
-Some PowerShell wrappers fail to forward named parameters correctly when calling another `.ps1` in-process.
-
-This wrapper activates the venv and then runs `transcribe.ps1` in a **fresh `pwsh -NoProfile -File ...` process**.
-That makes parameter binding identical to a direct call, while still inheriting the activated environment (PATH/FFMPEG_BIN).
-
----
-
 ## Notes
 
-- Your PowerShell prompt may show `base` or `diarize` depending on your prompt theme and whether conda is active.
-  The wrapper prints the actual `python.exe` path used, which is the reliable signal.
+- Your shell prompt may show `base` or `diarize` depending on your prompt theme and whether conda is active.
+  The wrapper prints the actual `python` path used, which is the reliable signal.

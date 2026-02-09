@@ -117,37 +117,36 @@ First run downloads models (~3 GB for large-v3, ~500 MB for pyannote).
 
 ---
 
-## 1. Check NVIDIA driver
+## 1. Install dependencies
 
-```powershell
-nvidia-smi
+```bash
+brew install ffmpeg
 ```
 
-Note the **Driver Version** and **CUDA Version** at the top.
-You need Driver ≥ 528 (any driver from 2023+ is fine).
+Verify:
+
+```bash
+ffmpeg -version
+python3 --version
+```
 
 ---
 
 ## 2. Create project folders
 
-```powershell
-$proj = "$env:USERPROFILE\Documents\Python\diarize"
+```bash
+proj=\"$HOME/Documents/Python/diarize\"
 
-mkdir $proj
-mkdir $proj\input
-mkdir $proj\out
-mkdir $proj\models
-mkdir $proj\scripts
+mkdir -p \"$proj/input\" \"$proj/out\" \"$proj/models\" \"$proj/scripts\"
 ```
 
 ---
 
 ## 3. Create Python virtual environment
 
-```powershell
-cd $env:USERPROFILE\Documents\Python\envs
-python -m venv diarize
-.\diarize\Scripts\Activate.ps1
+```bash
+python3 -m venv \"$HOME/Documents/Python/envs/diarize\"
+source \"$HOME/Documents/Python/envs/diarize/bin/activate\"
 python --version
 ```
 
@@ -155,9 +154,7 @@ python --version
 
 ## 4. Install pyannote.audio and faster-whisper
 
-Install pyannote first — it pins specific torch versions:
-
-```powershell
+```bash
 python -m pip install -U pip
 pip install pyannote.audio
 pip install faster-whisper
@@ -165,83 +162,37 @@ pip install faster-whisper
 
 ---
 
-## 5. Reinstall PyTorch with CUDA
+## 5. Set up HuggingFace access (required for pyannote)
 
-The previous step installs CPU-only PyTorch. Replace it with a CUDA build.
+Follow the same steps for account creation, accepting model terms, and creating a token.
 
-**Important:** pyannote.audio 4.x pins `torch==2.8.0`. The cu124 index does
-not carry 2.8.0 yet, so use **cu126**:
+Create `.hf_token` in your project root:
 
-```powershell
-pip install torch==2.8.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu126 --force-reinstall --no-deps
+```bash
+printf \"%s\" \"hf_YOUR_TOKEN_HERE\" > \"$proj/.hf_token\"
 ```
-
-Verify GPU access:
-
-```powershell
-python -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
-```
-
-Should print `2.8.0+cu126 True` and your GPU name.
 
 ---
 
-## 6. Set up HuggingFace access (required for pyannote)
+## 6. Copy scripts
 
-The pyannote community-1 model is free but gated. One-time setup:
-
-### 6a. Create HuggingFace account
-
-Go to <https://huggingface.co/join> and register.
-
-### 6b. Accept model terms
-
-Visit **both** pages and click "Agree and access repository":
-
-- <https://huggingface.co/pyannote/speaker-diarization-community-1>
-- <https://huggingface.co/pyannote/segmentation-3.0>
-
-(You fill in name / affiliation / use case — access is instant.)
-
-### 6c. Create access token
-
-Go to <https://huggingface.co/settings/tokens> → **Create new token** →
-give it a name like `diarize` → type **Read** → copy the token.
-
-### 6d. Store the token
-
-Create a file called `.hf_token` in your project root:
-
-```powershell
-$proj = "$env:USERPROFILE\Documents\Python\diarize"
-Set-Content -Path "$proj\.hf_token" -Value "hf_YOUR_TOKEN_HERE" -NoNewline
-```
-
-Replace `hf_YOUR_TOKEN_HERE` with your actual token.
-
-> Alternative: set an environment variable instead:
-> `$env:HF_TOKEN = "hf_YOUR_TOKEN_HERE"`
-
----
-
-## 7. Copy scripts
-
-Copy both files into the scripts folder:
+Copy these files into your scripts folder:
 
 ```
-C:\Users\josef\Documents\Python\diarize\scripts\
+~/Documents/Python/diarize/scripts/
     diarize.py
-    transcribe.ps1
+    transcribe.sh
+    run_diarize.sh
 ```
 
 ---
 
-## 8. Copy input data
+## 7. Copy input data
 
-Copy your batch folder into `input\`. Example:
+Copy your batch folder into `input/`. Example:
 
 ```
-C:\Users\josef\Documents\Python\diarize\input\Expert_03\
+~/Documents/Python/diarize/input/Expert_03/
     Expert Interview - Vorlage.docx
     Expert_03_Recording_1.m4a
     Expert_03_Recording_2.m4a
@@ -250,72 +201,25 @@ C:\Users\josef\Documents\Python\diarize\input\Expert_03\
 
 ---
 
-## 9. Test
+## 8. Test
 
-With the venv activated:
-
-```powershell
-python -c "from faster_whisper import WhisperModel; print('faster-whisper OK')"
-python -c "from pyannote.audio import Pipeline; print('pyannote OK')"
+```bash
+python -c \"from faster_whisper import WhisperModel; print('faster-whisper OK')\"
+python -c \"from pyannote.audio import Pipeline; print('pyannote OK')\"
 ```
 
 Then run a batch:
 
-```powershell
-cd $env:USERPROFILE\Documents\Python\diarize\scripts
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\transcribe.ps1 Expert_03 -NumSpeakers 2
+```bash
+cd \"$HOME/Documents/Python/diarize/scripts\"
+./run_diarize.sh Expert_03 --num-speakers 2
 ```
 
 First run downloads models (~3 GB for large-v3, ~500 MB for pyannote).
 
 ---
 
-## Quick reference: folder layout
-
-```
-C:\Users\josef\Documents\Python\
-    envs\
-        diarize\                ← venv
-    diarize\                    ← project root
-        .hf_token               ← HuggingFace token
-        input\
-            Expert_03\
-                *.m4a
-                expert_interview_context.txt
-        out\
-            Expert_03\
-                Expert_03_Recording_1\
-                    *.txt  *.json  *.srt          (combined)
-                    *_SPEAKER_00.txt/json/srt     (per speaker)
-                    *_SPEAKER_01.txt/json/srt
-                Expert_03_Recording_2\
-                    ...
-                _log.txt
-        models\                 ← whisper model cache
-        scripts\
-            diarize.py
-            transcribe.ps1
-```
-
----
-
 ## Known issues
-
-### pyannote overrides CUDA torch with CPU-only torch
-
-`pip install pyannote.audio` pins `torch==2.8.0` and pulls the CPU-only
-wheel from PyPI, replacing any CUDA build you installed earlier. This is
-why step 5 must come **after** step 4. The `--force-reinstall --no-deps`
-flags are required because pip considers the version "already satisfied"
-even though the CPU/CUDA variant differs.
-
-### torchcodec warning
-
-pyannote 4.x ships torchcodec as a dependency but it does not work on
-Windows (missing FFmpeg DLLs at the expected paths). The script works
-around this by preloading audio via torchaudio/soundfile instead.
-The warning is suppressed in `diarize.py`.
 
 ### m4a / AAC files
 
