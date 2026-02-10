@@ -1,10 +1,9 @@
 # Diarize Installation — Windows (PowerShell) + macOS (zsh)
 
 This sets up **faster-whisper + pyannote community-1** for speaker-attributed
-transcription on Windows or macOS.
+transcription on macOS.
 
 Prerequisites:
-- Windows: PowerShell, Python 3.12, ffmpeg, NVIDIA GPU with recent drivers
 - macOS: zsh, Python 3.11+, ffmpeg (CPU-only by default)
 
 ---
