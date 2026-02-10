@@ -2,7 +2,7 @@
 """
 Diarized transcription: faster-whisper + pyannote community-1.
 
-This script is designed to be called by your batch wrapper (transcribe.ps1).
+This script is designed to be called by your batch wrapper (transcribe.sh).
 It performs:
 
   1) speaker diarization (pyannote community-1, exclusive mode if available)
@@ -16,7 +16,7 @@ Improvements vs. the "midpoint + split-on-speaker-change" baseline:
   - optional utterance building by pauses & sentence punctuation + majority-vote speaker
     (reduces mid-sentence speaker flips in the human-readable transcript)
 
-Windows+CUDA note:
+Note:
   - CTranslate2/faster-whisper can crash during model destruction or interpreter shutdown.
     This script avoids those crash paths and exits safely after writing outputs.
 """
@@ -31,27 +31,7 @@ warnings.filterwarnings("ignore", message=".*TensorFloat-32.*")
 warnings.filterwarnings("ignore", message=".*std\\(\\): degrees of freedom is <= 0.*")
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
-# Optional: help TorchCodec / Torchaudio find FFmpeg DLLs on Windows.
-# Set one of:
-#   $env:FFMPEG_BIN  = "C:\path\to\ffmpeg\bin"
-#   $env:FFMPEG_HOME = "C:\path\to\ffmpeg"   (we'll also try \bin)
-#
-# This is NOT required for this script (we preload audio with torchaudio),
-# but it can silence pyannote/torchcodec warnings and helps other tooling.
 import sys
-if sys.platform.startswith("win"):
-    _ff = os.environ.get("FFMPEG_BIN") or os.environ.get("FFMPEG_HOME")
-    if _ff:
-        _cands = [_ff, os.path.join(_ff, "bin")]
-        for _p in _cands:
-            if os.path.isdir(_p):
-                try:
-                    os.add_dll_directory(_p)  # Python 3.8+ on Windows
-                except Exception:
-                    pass
-                # Also help subprocess("ffmpeg") resolution
-                os.environ["PATH"] = _p + os.pathsep + os.environ.get("PATH", "")
-                break
 
 import argparse
 import json
@@ -534,7 +514,7 @@ def run(args):
     if args.max_speakers is not None:
         diar_kw["max_speakers"] = args.max_speakers
 
-    # Preload audio with torchaudio to bypass torchcodec issues on Windows.
+    # Preload audio with torchaudio to bypass torchcodec issues.
     waveform, sample_rate, tmp_wav = load_audio(audio_path)
     audio_input = {"waveform": waveform, "sample_rate": sample_rate}
 
@@ -593,7 +573,7 @@ def run(args):
                     }
                 )
 
-    # IMPORTANT: Windows + CUDA + CTranslate2 may crash on model destruction.
+    # IMPORTANT: CTranslate2 may crash on model destruction.
     # Print progress and continue to writing outputs BEFORE any cleanup.
     print(f"      {len(words)} words transcribed")
     sys.stdout.flush()
@@ -706,7 +686,7 @@ def run(args):
         n_wrd = sum(len(u["words"]) for u in utterances if u["speaker"] == sp)
         print(f"  {sp}: {n_utt} turns, {n_wrd} words")
 
-    # FINAL SAFETY EXIT (Windows + CUDA)
+    # FINAL SAFETY EXIT
     if use_cuda and sys.platform.startswith("win"):
         sys.stdout.flush()
         sys.stderr.flush()
