@@ -1,4 +1,4 @@
-# Diarized transcription (macOS Bash + Python)
+# Diarized transcription (Bash + Python)
 
 Speaker-attributed transcription of German audio/video using
 **faster-whisper large-v3** (ASR) and **pyannote community-1** (diarization).

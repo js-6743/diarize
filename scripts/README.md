@@ -3,14 +3,16 @@
 This folder contains a working pipeline for **speaker diarization + transcription**:
 
 - `diarize.py` – Python pipeline (pyannote community-1 + faster-whisper alignment) fileciteturn9file0
-- `transcribe.sh` – macOS batch runner that scans `../input/<Batch>/`
-- `run_diarize.sh` – macOS wrapper: activates the diarize venv + (optionally) sets FFmpeg, then runs `transcribe.sh`
+- `transcribe.sh` – macOS/Linux batch runner that scans `../input/<Batch>/`
+- `run_diarize.sh` – macOS/Linux wrapper: activates the diarize venv + (optionally) sets FFmpeg, then runs `transcribe.sh`
 
 ---
 
 ## Install / Replace
 
 Copy these files into:
+
+macOS:
 
 `~/Documents/Python/diarize/scripts/`
 
@@ -24,6 +26,11 @@ and **replace existing files**:
 ---
 
 ## Recommended run
+
+```bash
+cd ~/Documents/Python/diarize/scripts
+./run_diarize.sh Biweekly --num-speakers 3 --extensions wav
+```
 
 ### macOS (zsh)
 
@@ -54,6 +61,12 @@ To force a specific ffmpeg folder (the folder that contains `ffmpeg`):
 ```
 
 If the path doesn’t exist, the wrapper prints a warning and continues.
+
+On macOS/Linux you can pass the folder that contains `ffmpeg`:
+
+```bash
+./run_diarize.sh Biweekly --ffmpeg-bin "/opt/homebrew/bin" --num-speakers 3
+```
 
 ---
 
